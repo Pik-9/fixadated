@@ -1,18 +1,26 @@
 package controller
 
 import (
+	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
-func blankHandler(w *http.ResponseWriter, r http.Request) {
+func blankHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	log.Println(r.Method, r.URL, ps)
+	w.WriteHeader(501)
+	w.Write([]byte("Not implemented."))
 }
 
-func GetRouter() http.ServeMux {
-	mux := http.NewServeMux()
+func GetRouter() *httprouter.Router {
+	mux := httprouter.New()
 
-	mux.HandleFunc("event/edit/", blankHandler)
-	mux.HandleFunc("event/register", blankHandler)
-	mux.HandleFunc("event/", blankHandler)
+	mux.POST("/event", blankHandler)
+	mux.GET("/event/:eventid", blankHandler)
+	mux.PATCH("/event/:eventid", blankHandler)
+	mux.POST("/event/:eventid/register", blankHandler)
+	mux.PATCH("/participation/:partid", blankHandler)
 
 	return mux
 }
