@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// TODO: Remove when not needed any longer
 func blankHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	log.Println(r.Method, r.URL, ps)
 	w.WriteHeader(501)
@@ -23,11 +24,11 @@ func GetRouter() *http.ServeMux {
 	}
 
 	apiMux := httprouter.New()
-	apiMux.POST("/api/event", blankHandler)
-	apiMux.GET("/api/event/:eventid", blankHandler)
-	apiMux.PATCH("/api/event/:eventid", blankHandler)
-	apiMux.POST("/api/event/:eventid/register", blankHandler)
-	apiMux.PATCH("/api/participation/:partid", blankHandler)
+	apiMux.POST("/api/event", NewEventHandler)
+	apiMux.GET("/api/event/:eventid", GetEventHandler)
+	apiMux.PATCH("/api/event/:eventid", PatchEventHandler)
+	apiMux.POST("/api/event/:eventid/register", RegisterForEventHandler)
+	apiMux.PATCH("/api/participation/:partid", PatchParticipationHandler)
 
 	ret := http.NewServeMux()
 	ret.Handle("/api/", apiMux)
