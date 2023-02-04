@@ -17,12 +17,10 @@ func blankHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 }
 
 func GetRouter() *http.ServeMux {
-	webappMux := httprouter.New()
 	appPath, err := fs.Sub(res.Webapp, "webapp")
 	if err != nil {
 		log.Fatal(err)
 	}
-	webappMux.ServeFiles("/*filepath", http.FS(appPath))
 
 	apiMux := httprouter.New()
 	apiMux.POST("/api/event", blankHandler)
@@ -33,7 +31,7 @@ func GetRouter() *http.ServeMux {
 
 	ret := http.NewServeMux()
 	ret.Handle("/api/", apiMux)
-	ret.Handle("/", webappMux)
+	ret.Handle("/", http.FileServer(http.FS(appPath)))
 
 	return ret
 }
