@@ -2,10 +2,11 @@ package models
 
 import (
 	"encoding/json"
-	"github.com/Pik-9/fixadated/util"
-	"time"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/Pik-9/fixadated/util"
 )
 
 type Availability uint8
@@ -34,18 +35,18 @@ type Event struct {
 }
 
 type EventPlus struct {
-	Id     util.Uuid `json:"id"`
-	EditId util.Uuid `json:"editID"`
-	Name         string        `json:"name"`
-	Description  string        `json:"description"`
-	Dates        []time.Time   `json:"dates"`
+	Id           util.Uuid          `json:"id"`
+	EditId       util.Uuid          `json:"editID"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Dates        []time.Time        `json:"dates"`
 	Participants []*ParticipantPlus `json:"participants"`
 }
 
 var (
-	eventById map[util.Uuid]*EventPlus
+	eventById   map[util.Uuid]*EventPlus
 	eventByEdit map[util.Uuid]*EventPlus
-	partByEdit map[util.Uuid]*ParticipantPlus
+	partByEdit  map[util.Uuid]*ParticipantPlus
 )
 
 func init() {
@@ -58,9 +59,9 @@ func init() {
 
 func NewEvent(name string, description string, dates []time.Time) Event {
 	ret := Event{
-		Name: name,
-		Description: description,
-		Dates: nil,
+		Name:         name,
+		Description:  description,
+		Dates:        nil,
 		Participants: make([]Participant, 0),
 	}
 
@@ -84,11 +85,11 @@ func GetEventByUuid(uuid util.Uuid) (*EventPlus, error) {
 
 func InsertNewEvent(event Event) *EventPlus {
 	ret := EventPlus{
-		Id: util.RandomUuid(),
-		EditId: util.RandomUuid(),
-		Name: event.Name,
-		Description: event.Description,
-		Dates: event.Dates,
+		Id:           util.RandomUuid(),
+		EditId:       util.RandomUuid(),
+		Name:         event.Name,
+		Description:  event.Description,
+		Dates:        event.Dates,
 		Participants: make([]*ParticipantPlus, 0),
 	}
 
@@ -153,9 +154,9 @@ func (evnt EventPlus) ToJSON() []byte {
 
 func (evnt EventPlus) GetFlatEvent() Event {
 	ret := Event{
-		Name: evnt.Name,
-		Description: evnt.Description,
-		Dates: evnt.Dates,
+		Name:         evnt.Name,
+		Description:  evnt.Description,
+		Dates:        evnt.Dates,
 		Participants: make([]Participant, len(evnt.Participants)),
 	}
 

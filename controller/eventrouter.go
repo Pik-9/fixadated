@@ -1,17 +1,42 @@
 package controller
 
 import (
-	"net/http"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/Pik-9/fixadated/util"
 	"github.com/Pik-9/fixadated/models"
+	"github.com/Pik-9/fixadated/util"
 )
 
+type clientEvent struct {
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Dates       []int64 `json:"dates"`
+}
+
 func NewEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	// TODO
+	cevnt := clientEvent{"", "", make([]int64, 0)}
+
+	err := util.DecodeJsonBody(w, r, &cevnt)
+	if err != nil {
+		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
+		http.Error(w, "Bad Request", 400)
+		return
+	}
+
+	dates := make([]time.Time, len(cevnt.Dates))
+	for index, tt := range cevnt.Dates {
+		dates[index] = time.UnixMilli(tt)
+	}
+
+	event := models.NewEvent(cevnt.Name, cevnt.Description, dates)
+	eventPlus := models.InsertNewEvent(event)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(eventPlus.ToJSON())
 }
 
 func GetEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

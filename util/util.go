@@ -4,7 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
+	"net/http"
 )
 
 type Uuid uint64
@@ -37,4 +39,19 @@ func RandomUuid() Uuid {
 	}
 
 	return Uuid(binary.LittleEndian.Uint64(buf))
+}
+
+func DecodeJsonBody[T interface{}](w http.ResponseWriter, r *http.Request, obj *T) error {
+	ctype := r.Header.Get("Content-Type")
+	if ctype != "" {
+		if ctype != "application/json" {
+			return errors.New("Wrong Content-Type: " + ctype)
+		}
+	}
+
+	bodyStream := http.MaxBytesReader(w, r.Body, 1<<20)
+	decoder := json.NewDecoder(bodyStream)
+	decoder.DisallowUnknownFields()
+
+	return decoder.Decode(obj)
 }
