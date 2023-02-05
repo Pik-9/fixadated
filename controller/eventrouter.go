@@ -36,7 +36,7 @@ func NewEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	eventPlus := models.InsertNewEvent(event)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(eventPlus.ToJSON())
+	w.Write(eventPlus.ToClientJSON())
 }
 
 func GetEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

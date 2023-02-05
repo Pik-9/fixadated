@@ -152,6 +152,27 @@ func (evnt EventPlus) ToJSON() []byte {
 	return ret
 }
 
+func (evnt EventPlus) ToClientJSON() []byte {
+	ev := struct{
+		Id           string          `json:"id"`
+		EditId       string          `json:"editID"`
+		Name         string             `json:"name"`
+		Description  string             `json:"description"`
+		Dates        []time.Time        `json:"dates"`
+		Participants []*ParticipantPlus `json:"participants"`
+	}{
+		Id: evnt.Id.String(),
+		EditId: evnt.EditId.String(),
+		Name: evnt.Name,
+		Description: evnt.Description,
+		Dates: evnt.Dates,
+		Participants: evnt.Participants,
+	}
+
+	ret, _ := json.Marshal(ev)
+	return ret
+}
+
 func (evnt EventPlus) GetFlatEvent() Event {
 	ret := Event{
 		Name:         evnt.Name,

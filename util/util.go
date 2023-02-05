@@ -11,7 +11,7 @@ import (
 
 type Uuid uint64
 
-func (uuid Uuid) ToBase64() string {
+func (uuid Uuid) String() string {
 	buf := make([]byte, 8)
 	binary.LittleEndian.PutUint64(buf, uint64(uuid))
 	return base64.StdEncoding.EncodeToString(buf)
