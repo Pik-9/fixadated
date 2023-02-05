@@ -16,6 +16,8 @@ jobs:
     - uses: actions/setup-go@v3
       with:
         go-version: 'stable' # The Go version to download (if necessary) and use.
+    - name: Prepare embedded folder
+      run: echo "<!DOCTYPE html>\n<html><body><h1>It's Working</h1></body></html>" > res/webapp/index.html
     - name: Run Tests (if any)
       run: go test
     - name: Build binary
