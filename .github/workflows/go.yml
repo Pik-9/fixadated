@@ -1,0 +1,28 @@
+name: Testing and building the go code.
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 'stable' # The Go version to download (if necessary) and use.
+    - name: Run Tests (if any)
+      run: go test
+    - name: Build binary
+      run: go build
+    - name: Strip binary of symbols
+      run: strip fixadated
+    - name: Upload compiled binary
+      uses: actions/upload-artifact@v3
+      with:
+        path: fixadated
