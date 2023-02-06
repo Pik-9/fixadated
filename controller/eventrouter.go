@@ -83,8 +83,30 @@ func RegisterForEventHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	// TODO
-	log.Println(r.Method, r.URL, eventid)
-	w.WriteHeader(501)
-	w.Write([]byte("Not implemented."))
+	event, err := models.GetEventByUuid(eventid)
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("Event not found."))
+		return
+	}
+
+	var clientData models.Participant
+	err = util.DecodeJsonBody(w, r, &clientData)
+	if err != nil {
+		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
+		w.WriteHeader(401)
+		w.Write([]byte("Bad Request"))
+		return
+	}
+
+	participant, err := event.RegisterParticipant(clientData)
+	if err != nil {
+		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
+		w.WriteHeader(401)
+		w.Write([]byte("Bad Request"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(participant.ToJSON())
 }

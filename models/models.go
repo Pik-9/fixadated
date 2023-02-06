@@ -12,9 +12,9 @@ import (
 type Availability uint8
 
 const (
-	Available = Availability(iota)
+	NotAvailable = Availability(iota)
+	Availble
 	Maybe
-	NotAvailble
 )
 
 type Participant struct {
@@ -153,19 +153,19 @@ func (evnt EventPlus) ToJSON() []byte {
 }
 
 func (evnt EventPlus) ToClientJSON() []byte {
-	ev := struct{
-		Id           string          `json:"id"`
-		EditId       string          `json:"editID"`
+	ev := struct {
+		Id           string             `json:"id"`
+		EditId       string             `json:"editID"`
 		Name         string             `json:"name"`
 		Description  string             `json:"description"`
 		Dates        []time.Time        `json:"dates"`
 		Participants []*ParticipantPlus `json:"participants"`
 	}{
-		Id: evnt.Id.String(),
-		EditId: evnt.EditId.String(),
-		Name: evnt.Name,
-		Description: evnt.Description,
-		Dates: evnt.Dates,
+		Id:           evnt.Id.String(),
+		EditId:       evnt.EditId.String(),
+		Name:         evnt.Name,
+		Description:  evnt.Description,
+		Dates:        evnt.Dates,
 		Participants: evnt.Participants,
 	}
 
