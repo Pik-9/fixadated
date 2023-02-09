@@ -68,7 +68,7 @@ func PatchEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	event, err := models.GetEventByUuid(eventid)
+	event, err := models.GetEventByEditUuid(eventid)
 	if err != nil {
 		w.WriteHeader(404)
 		w.Write([]byte("Event not found."))
@@ -85,8 +85,12 @@ func PatchEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	}
 
 	// The dates cannot be modified afterwards.
-	event.Name = clientData.Name
-	event.Description = clientData.Description
+	if clientData.Name != "" {
+		event.Name = clientData.Name
+	}
+	if clientData.Description != "" {
+		event.Description = clientData.Description
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(event.ToClientJSON())

@@ -83,6 +83,15 @@ func GetEventByUuid(uuid util.Uuid) (*EventPlus, error) {
 	}
 }
 
+func GetEventByEditUuid(uuid util.Uuid) (*EventPlus, error) {
+	ret, ok := eventByEdit[uuid]
+	if ok {
+		return ret, nil
+	} else {
+		return nil, errors.New("Event not found.")
+	}
+}
+
 func InsertNewEvent(event Event) *EventPlus {
 	ret := EventPlus{
 		Id:           util.RandomUuid(),
