@@ -68,10 +68,28 @@ func PatchEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	// TODO
-	log.Println(r.Method, r.URL, eventid)
-	w.WriteHeader(501)
-	w.Write([]byte("Not implemented."))
+	event, err := models.GetEventByUuid(eventid)
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("Event not found."))
+		return
+	}
+
+	var clientData models.Event
+	err = util.DecodeJsonBody(w, r, &clientData)
+	if err != nil {
+		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
+		w.WriteHeader(401)
+		w.Write([]byte("Bad Request"))
+		return
+	}
+
+	// The dates cannot be modified afterwards.
+	event.Name = clientData.Name
+	event.Description = clientData.Description
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(event.ToClientJSON())
 }
 
 func RegisterForEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
