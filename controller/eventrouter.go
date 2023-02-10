@@ -3,7 +3,6 @@ package controller
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -11,15 +10,8 @@ import (
 	"github.com/Pik-9/fixadated/util"
 )
 
-type clientEvent struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Dates       []int64 `json:"dates"`
-}
-
 func NewEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	cevnt := clientEvent{"", "", make([]int64, 0)}
-
+	var cevnt models.Event
 	err := util.DecodeJsonBody(w, r, &cevnt)
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
@@ -27,23 +19,17 @@ func NewEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		return
 	}
 
-	dates := make([]time.Time, len(cevnt.Dates))
-	for index, tt := range cevnt.Dates {
-		dates[index] = time.UnixMilli(tt)
-	}
-
-	event := models.NewEvent(cevnt.Name, cevnt.Description, dates)
-	eventPlus := models.InsertNewEvent(event)
+	ret := models.InsertNewEvent(cevnt)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(eventPlus.ToClientJSON())
+	w.Write(ret.ToClientJSON(false))
 }
 
 func GetEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	eventid, err := util.Base64ToUuid(ps.ByName("eventid"))
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
@@ -51,19 +37,19 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	event, err := models.GetEventByUuid(eventid)
 	if err != nil {
 		w.WriteHeader(404)
-		w.Write([]byte("Event not found."))
+		w.Write([]byte("Event Not Found."))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(event.GetFlatEvent().ToJSON())
+	w.Write(event.ToClientJSON(true))
 }
 
 func PatchEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	eventid, err := util.Base64ToUuid(ps.ByName("eventid"))
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
@@ -79,28 +65,22 @@ func PatchEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	err = util.DecodeJsonBody(w, r, &clientData)
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
 
-	// The dates cannot be modified afterwards.
-	if clientData.Name != "" {
-		event.Name = clientData.Name
-	}
-	if clientData.Description != "" {
-		event.Description = clientData.Description
-	}
+	event.EditSafely(clientData)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(event.ToClientJSON())
+	w.Write(event.ToClientJSON(false))
 }
 
 func RegisterForEventHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	eventid, err := util.Base64ToUuid(ps.ByName("eventid"))
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
@@ -116,7 +96,7 @@ func RegisterForEventHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	err = util.DecodeJsonBody(w, r, &clientData)
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
@@ -124,11 +104,11 @@ func RegisterForEventHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	participant, err := event.RegisterParticipant(clientData)
 	if err != nil {
 		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
+		w.WriteHeader(400)
 		w.Write([]byte("Bad Request"))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(participant.ToJSON())
+	w.Write(participant.ToClientJSON(false))
 }

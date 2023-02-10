@@ -19,6 +19,14 @@ func PatchParticipationHandler(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
+	participant, err := models.GetParticipantByUuid(partid)
+	if err != nil {
+		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
+		w.WriteHeader(404)
+		w.Write([]byte("Participant Not Found"))
+		return
+	}
+
 	var clientData models.Participant
 	err = util.DecodeJsonBody(w, r, &clientData)
 	if err != nil {
@@ -28,14 +36,8 @@ func PatchParticipationHandler(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	participant, err := models.EditParticipation(partid, clientData.Name, clientData.Days)
-	if err != nil {
-		log.Printf("ERROR in %s %s: %s\n", r.Method, r.URL, err.Error())
-		w.WriteHeader(401)
-		w.Write([]byte("Bad Request"))
-		return
-	}
+	participant.EditSafely(clientData)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(participant.Participant.ToJSON())
+	w.Write(participant.ToClientJSON(false))
 }

@@ -11,14 +11,14 @@ import (
 
 type Uuid uint64
 
-func (uuid Uuid) String() string {
+func (uuid Uuid) ToBase64() string {
 	buf := make([]byte, 8)
 	binary.LittleEndian.PutUint64(buf, uint64(uuid))
-	return base64.StdEncoding.EncodeToString(buf)
+	return base64.URLEncoding.EncodeToString(buf)
 }
 
 func Base64ToUuid(b64 string) (Uuid, error) {
-	data, err := base64.StdEncoding.DecodeString(b64)
+	data, err := base64.URLEncoding.DecodeString(b64)
 	if err != nil {
 		return 0, err
 	}
