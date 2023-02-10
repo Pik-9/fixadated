@@ -1,29 +1,31 @@
 // fixadated is a daemon for a collaborative date finding tool.
-//    Copyright (C) 2023 Daniel Steinhauer <d.steinhauer@mailbox.org>
 //
-//    This program is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU Affero General Public License as
-//    published by the Free Software Foundation, either version 3 of the
-//    License, or (at your option) any later version.
+//	Copyright (C) 2023 Daniel Steinhauer <d.steinhauer@mailbox.org>
 //
-//    This program is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU Affero General Public License for more details.
+//	This program is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU Affero General Public License as
+//	published by the Free Software Foundation, either version 3 of the
+//	License, or (at your option) any later version.
 //
-//    You should have received a copy of the GNU Affero General Public License
-//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU Affero General Public License for more details.
+//
+//	You should have received a copy of the GNU Affero General Public License
+//	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package models
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/Pik-9/fixadated/util"
 )
 
-type Availability uint8
+type Availability int8
 
 const (
 	NotAvailable = Availability(iota)
@@ -185,4 +187,36 @@ func InsertNewEvent(event Event) *Event {
 	eventByEdit[ret.EditId] = ret
 
 	return ret
+}
+
+func SaveToDisk() error {
+	path, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+
+	fdir := path + "/fixadated"
+	err = os.MkdirAll(fdir, 0755)
+	if err != nil {
+		return err
+	}
+
+	fout, err := os.OpenFile(fdir+"/dates.db", os.O_RDWR|os.O_CREATE, 0755)
+	defer fout.Close()
+	if err != nil {
+		return err
+	}
+
+	evnts := make([]*Event, 0)
+	for _, val := range eventById {
+		evnts = append(evnts, val)
+	}
+
+	out, _ := json.Marshal(evnts)
+	_, err = fout.Write(out)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
