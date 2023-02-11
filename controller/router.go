@@ -26,13 +26,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// TODO: Remove when not needed any longer
-func blankHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	log.Println(r.Method, r.URL, ps)
-	w.WriteHeader(501)
-	w.Write([]byte("Not implemented."))
-}
-
 func GetRouter() *http.ServeMux {
 	appPath, err := fs.Sub(res.Webapp, "webapp")
 	if err != nil {

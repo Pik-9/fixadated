@@ -67,5 +67,5 @@ func main() {
 		log.Printf("ERROR while saving: %s\n", err.Error())
 	}
 
-	log.Println("Good Byte")
+	log.Println("Good Bye")
 }

@@ -67,11 +67,6 @@ func init() {
 	}
 }
 
-func (prt Participant) ToJSON() []byte {
-	ret, _ := json.Marshal(prt)
-	return ret
-}
-
 func (part Participant) ToClientJSON(flat bool) []byte {
 	pt := make(map[string]interface{})
 	pt["name"] = part.Name
@@ -92,11 +87,6 @@ func (part *Participant) EditSafely(npart Participant) {
 	if npart.Name != "" {
 		part.Name = npart.Name
 	}
-}
-
-func (evnt Event) ToJSON() []byte {
-	ret, _ := json.Marshal(evnt)
-	return ret
 }
 
 func (evnt Event) ToClientJSON(flat bool) []byte {
