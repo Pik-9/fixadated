@@ -19,18 +19,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/Pik-9/fixadated/controller"
-	"github.com/Pik-9/fixadated/models"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"time"
+
+	"github.com/Pik-9/fixadated/controller"
+	"github.com/Pik-9/fixadated/models"
 )
 
 func signalHandler(srv *http.Server, idleConnsClosed chan<- struct{}) {
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, os.Interrupt, os.Kill)
+	sigint := GetSignalChannel()
 	<-sigint
 
 	err := srv.Shutdown(context.Background())

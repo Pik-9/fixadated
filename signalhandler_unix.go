@@ -14,11 +14,16 @@
 //
 //	You should have received a copy of the GNU Affero General Public License
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.
-package res
+package main
 
 import (
-	"embed"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
-//go:embed webapp
-var Webapp embed.FS
+func GetSignalChannel() chan os.Signal {
+	ret := make(chan os.Signal, 1)
+	signal.Notify(ret, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	return ret
+}
