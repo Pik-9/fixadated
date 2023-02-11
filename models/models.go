@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"log"
+	"bytes"
 
 	"github.com/Pik-9/fixadated/util"
 )
@@ -59,7 +61,10 @@ func init() {
 	eventByEdit = make(map[util.Uuid]*Event)
 	partByEdit = make(map[util.Uuid]*Participant)
 
-	// TODO: Load events and participations from disk
+	err := loadFromDisk()
+	if err != nil {
+		log.Printf("Could not load data from disk: %s\n", err)
+	}
 }
 
 func (prt Participant) ToJSON() []byte {
@@ -216,6 +221,41 @@ func SaveToDisk() error {
 	_, err = fout.Write(out)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func loadFromDisk() error {
+	path, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+
+	fpath := path + "/fixadated/dates.db"
+
+	rawContent, err := os.ReadFile(fpath)
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewReader(rawContent)
+	decoder := json.NewDecoder(reader)
+	decoder.DisallowUnknownFields()
+
+	var events []*Event
+	err = decoder.Decode(&events)
+
+	if err != nil {
+		return err
+	}
+
+	for _, evnt := range events {
+		eventById[evnt.Id] = evnt
+		eventByEdit[evnt.EditId] = evnt
+		for _, part := range evnt.Participants {
+			partByEdit[part.EditId] = part
+		}
 	}
 
 	return nil
