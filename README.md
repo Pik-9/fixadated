@@ -36,5 +36,5 @@ Method |            Route             |    Expected JSON Request   | Answer
 GET    | /api/event/:eventid          | _None_                     | {name, description, dates, participants}
 POST   | /api/event                   | {name, description, dates} | {name, description, dates, id, editId, participants}
 PATCH  | /api/event/:editeventid      | {name, description}        | {name, description, dates, id, editId, participants
-POST   | /api/event/:eventid/register | {name, declarations}       | {name, editId, declarations}
-PATCH  | /api/participation/:partid   | {name, declarations}       | {name, editId, declarations}
+POST   | /api/event/:eventid/register | {name, declarations}       | {name, id, editId, declarations}
+PATCH  | /api/participation/:partid   | {name, declarations}       | {name, id, editId, declarations}

@@ -17,12 +17,12 @@
 package models
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"log"
-	"bytes"
+	"os"
 
 	"github.com/Pik-9/fixadated/util"
 )
@@ -36,6 +36,7 @@ const (
 )
 
 type Participant struct {
+	Id     util.Uuid      `json:"id"`
 	EditId util.Uuid      `json:"editID"`
 	Name   string         `json:"name"`
 	Days   []Availability `json:"declarations"`
@@ -69,6 +70,7 @@ func init() {
 
 func (part Participant) ToClientJSON(flat bool) []byte {
 	pt := make(map[string]interface{})
+	pt["id"] = part.Id.ToBase64()
 	pt["name"] = part.Name
 	pt["dates"] = part.Days
 	if !flat {
@@ -91,6 +93,7 @@ func (part *Participant) EditSafely(npart Participant) {
 
 func (evnt Event) ToClientJSON(flat bool) []byte {
 	type strippedDownPart struct {
+		Id   string         `json:"id"`
 		Name string         `json:"name"`
 		Days []Availability `json:"declarations"`
 	}
@@ -106,6 +109,7 @@ func (evnt Event) ToClientJSON(flat bool) []byte {
 	parts := make([]strippedDownPart, len(evnt.Participants))
 
 	for index, item := range evnt.Participants {
+		parts[index].Id = item.Id.ToBase64()
 		parts[index].Name = item.Name
 		parts[index].Days = item.Days
 	}
@@ -132,6 +136,7 @@ func (evnt *Event) RegisterParticipant(participant Participant) (*Participant, e
 	}
 
 	npart := new(Participant)
+	npart.Id = util.RandomUuid()
 	npart.EditId = util.RandomUuid()
 	npart.Name = participant.Name
 	npart.Days = participant.Days
